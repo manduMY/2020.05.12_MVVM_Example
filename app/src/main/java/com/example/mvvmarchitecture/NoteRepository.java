@@ -13,6 +13,7 @@ import java.util.List;
 // 2. 다른 데이터베이스 작업(ex: SQLite Query)을 숨기고 ViewModel에 깨끗한 API를 제공한다.
 // 3. Room은 메인 스레드에 대한 데이터베이스 Query를 허용하지 않으므로 비동기식으로 실행하기 위해 AsyncTasks를 사용한다.
 // 4. LiveData는 Worker Thread에서 자동으로 가져오기 때문에 이것을 건드릴 필요는 없다.
+// 5. Repository가 Room Database에서 가져온 데이터를 객체형식으로 보유한다.
 public class NoteRepository {
     // Room에 있는 데이터를 삽입, 삭제, 수정하기 위함.
     private NoteDao noteDao;

@@ -50,7 +50,6 @@ public abstract class NoteDatabase extends RoomDatabase {
 
         private PopulateDbAsyncTask(NoteDatabase db) {
             noteDao = db.noteDao();
-
         }
         @Override
         protected Void doInBackground(Void... voids) {
