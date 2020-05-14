@@ -1,23 +1,40 @@
 package com.example.mvvmarchitecture;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    public static final int ADD_NOTE_REQUEST = 1;
+
     private ViewModelProvider.AndroidViewModelFactory viewModelFactory;
     private NoteViewModel noteViewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FloatingActionButton buttonAddNote = findViewById(R.id.button_add_note);
+        buttonAddNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // FloatingActionButton을 클릭하면 note 추가 액티비티가 나온다.
+                Intent intent = new Intent(MainActivity.this, AddNoteActivity.class);
+                startActivityForResult(intent, ADD_NOTE_REQUEST);
+            }
+        });
 
         // *Recycler View*
         // 1. RecyclerView는 "많은 수의 데이터 집합을, 제한된 영역 내에서 유연하게(flexible) 표시할 수 있도록 만들어주는 위젯"입니다.
@@ -54,5 +71,26 @@ public class MainActivity extends AppCompatActivity {
                 adapter.setNotes(notes);
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ADD_NOTE_REQUEST && resultCode == RESULT_OK) {
+            // AddNoteActivity에서 putExtra로 보낸 데이터들을 getExtra로 받는다.
+            String title = data.getStringExtra(AddNoteActivity.EXTRA_TITLE);
+            String description = data.getStringExtra(AddNoteActivity.EXTRA_DESCRIPTION);
+            int priority = data.getIntExtra(AddNoteActivity.EXTRA_PRIORITY, 1);
+
+            // getExtra로 받은 데이터들을 Note Model에 최신화 시켜주고
+            // note 객체를 Viewmodel을 통해 repository -> noteDao 로 보내 데이터 베이스인 Room에 insert한다.
+            Note note = new Note(title, description, priority);
+            noteViewModel.insert(note);
+
+            Toast.makeText(this, "Note Saved", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Note Not Saved", Toast.LENGTH_SHORT).show();
+        }
     }
 }
