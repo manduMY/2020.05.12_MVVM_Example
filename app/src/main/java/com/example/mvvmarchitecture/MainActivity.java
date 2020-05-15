@@ -23,6 +23,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     public static final int ADD_NOTE_REQUEST = 1;
+    public static final int EDIT_NOTE_REQUEST = 2;
 
     private ViewModelProvider.AndroidViewModelFactory viewModelFactory;
     private NoteViewModel noteViewModel;
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // FloatingActionButton을 클릭하면 note 추가 액티비티가 나온다.
-                Intent intent = new Intent(MainActivity.this, AddNoteActivity.class);
+                Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
                 startActivityForResult(intent, ADD_NOTE_REQUEST);
             }
         });
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // 아이템 터치시 동작 메서드
+        // 아이템 스와이프 처리 메서드
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
@@ -90,6 +91,19 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Note deleted", Toast.LENGTH_SHORT).show();
             }
         }).attachToRecyclerView(recyclerView);
+
+        // 아이템 편집을 위한 아이템 클릭 시 편집 Activity 창 전환 이벤트 처리
+        adapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Note note) {
+                Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
+                intent.putExtra(AddEditNoteActivity.EXTRA_ID, note.getId());
+                intent.putExtra(AddEditNoteActivity.EXTRA_TITLE, note.getTitle());
+                intent.putExtra(AddEditNoteActivity.EXTRA_DESCRIPTION, note.getDescription());
+                intent.putExtra(AddEditNoteActivity.EXTRA_PRIORITY, note.getPriority());
+                startActivityForResult(intent, EDIT_NOTE_REQUEST);
+            }
+        });
     }
 
     @Override
@@ -98,9 +112,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == ADD_NOTE_REQUEST && resultCode == RESULT_OK) {
             // AddNoteActivity에서 putExtra로 보낸 데이터들을 getExtra로 받는다.
-            String title = data.getStringExtra(AddNoteActivity.EXTRA_TITLE);
-            String description = data.getStringExtra(AddNoteActivity.EXTRA_DESCRIPTION);
-            int priority = data.getIntExtra(AddNoteActivity.EXTRA_PRIORITY, 1);
+            String title = data.getStringExtra(AddEditNoteActivity.EXTRA_TITLE);
+            String description = data.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION);
+            int priority = data.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1);
 
             // getExtra로 받은 데이터들을 Note Model에 최신화 시켜주고
             // note 객체를 Viewmodel을 통해 repository -> noteDao 로 보내 데이터 베이스인 Room에 insert한다.
@@ -108,6 +122,23 @@ public class MainActivity extends AppCompatActivity {
             noteViewModel.insert(note);
 
             Toast.makeText(this, "Note Saved", Toast.LENGTH_SHORT).show();
+        } else if (requestCode == EDIT_NOTE_REQUEST && resultCode == RESULT_OK) {
+            int id = data.getIntExtra(AddEditNoteActivity.EXTRA_ID, -1);
+
+            if (id == -1) {
+                Toast.makeText(this, "Note can't be updated", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String title = data.getStringExtra(AddEditNoteActivity.EXTRA_TITLE);
+            String description = data.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION);
+            int priority = data.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1);
+
+            Note note = new Note(title, description, priority);
+            note.setId(id);
+            noteViewModel.update(note);
+
+            Toast.makeText(this, "Note updated", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Note Not Saved", Toast.LENGTH_SHORT).show();
         }

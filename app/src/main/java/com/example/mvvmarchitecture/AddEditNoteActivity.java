@@ -14,7 +14,8 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class AddNoteActivity extends AppCompatActivity {
+public class AddEditNoteActivity extends AppCompatActivity {
+    public static final String EXTRA_ID = "com.example.mvvmarchitecture.EXTRA_ID";
     public static final String EXTRA_TITLE = "com.example.mvvmarchitecture.EXTRA_TITLE";
     public static final String EXTRA_DESCRIPTION = "com.example.mvvmarchitecture.EXTRA_DESCRIPTION";
     public static final String EXTRA_PRIORITY = "com.example.mvvmarchitecture.EXTRA_PRIORITY";
@@ -37,7 +38,18 @@ public class AddNoteActivity extends AppCompatActivity {
         numberPickerPriority.setMaxValue(10);
 
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
-        setTitle("Add Note");
+
+        Intent intent = getIntent();
+
+        if (intent.hasExtra(EXTRA_ID)) {
+            setTitle("Edit Note");
+            editTextTitle.setText(intent.getStringExtra(EXTRA_TITLE));
+            editTextDescription.setText(intent.getStringExtra(EXTRA_DESCRIPTION));
+            numberPickerPriority.setValue(intent.getIntExtra(EXTRA_PRIORITY, 1));
+        } else {
+            setTitle("Add Note");
+        }
+
     }
 
     private void saveNote() {
@@ -54,6 +66,12 @@ public class AddNoteActivity extends AppCompatActivity {
         data.putExtra(EXTRA_TITLE, title);
         data.putExtra(EXTRA_DESCRIPTION, description);
         data.putExtra(EXTRA_PRIORITY, priority);
+
+        int id = getIntent().getIntExtra(EXTRA_ID, -1);
+        if(id != -1) {
+            data.putExtra(EXTRA_ID, id);
+        }
+
         // 화면 전환할 때 데이터 추가한 data 객체를 같이 전달한다.
         setResult(RESULT_OK, data);
         finish();
