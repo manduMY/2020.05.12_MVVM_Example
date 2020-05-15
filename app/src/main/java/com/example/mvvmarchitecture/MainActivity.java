@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 // onChange 콜백에서는 해당 데이터베이스 테이블의 무언가가 변경될 때마다 데이터에 대한 업데이트를 받는다.
                 // LiveData는 라이프사이클에서 적절한 시점에 자동으로 업데이트 전송을 시작 및 중지하고 사용되지 않는 참조를 정리한다.
                 // update RecyclerView
-                adapter.setNotes(notes);
+                adapter.submitList(notes);
             }
         });
 
