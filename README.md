@@ -9,4 +9,4 @@ Android Java MVVM 적용 예제
 
 -Room + LiveData + Repository + Adapter + ViewModel
 
-> 예제
+> 참고 : https://www.youtube.com/watch?v=ARpn-1FPNE4&list=PLrnPJCHvNZuDihTpkRs6SpZhqgBqPU118
